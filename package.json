@@ -1,0 +1,45 @@
+{
+  "name": "11ty-sandbox",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "build": "npx eleventy",
+    "watch:eleventy": "npx eleventy --watch",
+    "watch:sass": "npx sass --watch src/styles:dist/styles --no-source-map",
+    "watch:ts": "npx tsc --watch",
+    "serve": "concurrently \"npx tsc --watch\" \"npx eleventy --serve\" \"npx sass --watch src/styles:dist/styles --no-source-map\"",
+    "prettier": "npx prettier --write \"dist/**/*.html\"",
+    "lint:css": "npx stylelint \"src/styles/**/*.scss\" --fix",
+    "lint:ts": "npx eslint \"src/scripts/**/*.ts\" --fix",
+    "format": "npm run prettier && npm run lint:css && npm run lint:ts",
+    "build:ts": "npx tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.1",
+    "@types/node": "^20.14.10",
+    "@typescript-eslint/eslint-plugin": "^7.16.0",
+    "@typescript-eslint/parser": "^7.16.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^9.7.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "prettier": "^3.3.3",
+    "sass": "^1.77.8",
+    "stylelint": "^16.7.0",
+    "stylelint-config-recess-order": "^5.0.1",
+    "stylelint-config-recommended-scss": "^14.1.0",
+    "stylelint-config-standard-scss": "^13.1.0",
+    "typescript": "^5.5.3"
+  },
+  "volta": {
+    "node": "20.15.1"
+  },
+  "dependencies": {
+    "markdown-it": "^14.1.0"
+  }
+}
