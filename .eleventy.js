@@ -59,6 +59,12 @@ module.exports = function (eleventyConfig) {
   // JavaScript ファイルを src/scripts から dist/scripts にコピーする設定を追加
   eleventyConfig.addPassthroughCopy({ 'src/scripts/**/*.js': 'scripts' });
 
+  eleventyConfig.addPassthroughCopy("src/assets");
+
+  eleventyConfig.addCollection("posts", function (collection) {
+    return collection.getFilteredByGlob("src/blog/_posts/*.md").reverse();
+  });
+
   return {
     dir: {
       input: 'src',
