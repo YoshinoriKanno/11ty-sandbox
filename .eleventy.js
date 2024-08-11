@@ -20,46 +20,53 @@ module.exports = function (eleventyConfig) {
     // 画像ファイルを圧縮して dist/images に出力
     const imagesDir = 'src/assets/images';
     const outputImagesDir = 'dist/images';
-    if (!fs.existsSync(outputImagesDir)) {
-      fs.mkdirSync(outputImagesDir, { recursive: true });
-    }
 
-    const imageFiles = fs.readdirSync(imagesDir);
-    for (const file of imageFiles) {
-      const inputPath = path.join(imagesDir, file);
-      const outputPath = path.join(outputImagesDir, file);
+    const processImages = async (inputDir, outputDir) => {
+      const entries = await fs.promises.readdir(inputDir, { withFileTypes: true });
 
-      try {
-        const image = sharp(inputPath);
-        const metadata = await image.metadata();
+      for (const entry of entries) {
+        const inputPath = path.join(inputDir, entry.name);
+        const outputPath = path.join(outputDir, entry.name);
 
-        if (metadata.format === 'jpeg') {
-          await image
-            .resize({ width: 800 }) // 必要に応じてサイズを調整
-            .jpeg({ quality: 60 }) // JPEG の品質を設定
-            .toFile(outputPath);
-          console.log(`Compressed ${file} as JPEG`);
-        } else if (metadata.format === 'png') {
-          await image
-            .resize({ width: 800 }) // 必要に応じてサイズを調整
-            .png({ compressionLevel: 9 }) // PNG の品質を設定
-            .toFile(outputPath);
-          console.log(`Compressed ${file} as PNG`);
+        if (entry.isDirectory()) {
+          // ディレクトリなら再帰的に処理
+          if (!fs.existsSync(outputPath)) {
+            fs.mkdirSync(outputPath, { recursive: true });
+          }
+          await processImages(inputPath, outputPath);
         } else {
-          // 他のフォーマットの場合、そのままコピー
-          await fs.promises.copyFile(inputPath, outputPath);
-          console.log(`Copied ${file} without compression`);
+          // ファイルなら画像を処理
+          try {
+            const image = sharp(inputPath);
+            const metadata = await image.metadata();
+
+            if (metadata.format === 'jpeg' || metadata.format === 'jpg') {
+              await image
+                .jpeg({ quality: 60 }) // JPEG の品質を設定
+                .toFile(outputPath);
+              console.log(`Compressed ${entry.name} as JPEG`);
+            } else if (metadata.format === 'png') {
+              await image
+                .png({ quality: 65 }) // PNG の品質を設定
+                .toFile(outputPath);
+              console.log(`Compressed ${entry.name} as PNG`);
+            } else {
+              // 他のフォーマットの場合、そのままコピー
+              await fs.promises.copyFile(inputPath, outputPath);
+              console.log(`Copied ${entry.name} without compression`);
+            }
+          } catch (err) {
+            console.error(`Error processing ${entry.name}:`, err);
+          }
         }
-      } catch (err) {
-        console.error(`Error processing ${file}:`, err);
       }
-    }
+    };
+
+    await processImages(imagesDir, outputImagesDir);
   });
 
   // JavaScript ファイルを src/scripts から dist/scripts にコピーする設定を追加
   eleventyConfig.addPassthroughCopy({ 'src/scripts/**/*.js': 'scripts' });
-
-  eleventyConfig.addPassthroughCopy("src/assets");
 
   eleventyConfig.addCollection("posts", function (collection) {
     return collection.getFilteredByGlob("src/blog/_posts/*.md").reverse();
