@@ -1,2 +1,2 @@
 "use strict";
-console.log('Hello, 11ty with TypeScript!');
+console.log('Hello, 11ty with TypeScript!!!');
