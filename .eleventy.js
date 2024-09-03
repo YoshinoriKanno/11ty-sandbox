@@ -13,6 +13,7 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addWatchTarget('./src/tailwind.css'); // Tailwind CSSの入力ファイルも監視
 
   let processedImages = new Set();
+  let tailwindBuildTime = Date.now(); // タイムスタンプを保存する変数
 
   eleventyConfig.on('beforeBuild', async () => {
     // ここで Tailwind CSS をビルド
@@ -50,6 +51,7 @@ module.exports = function (eleventyConfig) {
       });
 
     fs.writeFileSync(tailwindOutputPath, tailwindProcessed);
+    tailwindBuildTime = Date.now(); // タイムスタンプを更新
     console.log(`Tailwind CSS built at ${tailwindOutputPath}`);
   };
 
@@ -94,6 +96,11 @@ module.exports = function (eleventyConfig) {
     return collection.getFilteredByGlob("src/blog/_posts/*.md").reverse();
   });
 
+  // タイムスタンプをテンプレートに渡す
+  eleventyConfig.addGlobalData("tailwindBuildTime", () => {
+    return tailwindBuildTime;
+  });
+
   eleventyConfig.setBrowserSyncConfig({
     callbacks: {
       ready: async (err, bs) => {
@@ -111,3 +118,4 @@ module.exports = function (eleventyConfig) {
     },
   };
 };
+
